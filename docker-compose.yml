@@ -1,4 +1,4 @@
-version: '3.8'
+version: 'v1'
 
 services:
   # Define the backend service (Node.js Express)
