@@ -50,8 +50,14 @@ jobs:
         # Push all images defined in your docker-compose.yml to Docker Hub
         docker-compose -f docker-compose.yml push
 
-    - name: Setup SSH Agent
+    - name: Setup SSH Agent and Debug
       run: |
+        # Print the EC2 host to check if it's correct
+        echo "EC2 Host:************************************************************************************************************************** ${{ secrets.EC2_HOST }}"
+
+        # Ensure the key is being retrieved correctly without printing the full key
+        echo "EC2 SSH Key Length: ${#EC2_SSH_KEY}"
+
         mkdir -p ~/.ssh
         echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
