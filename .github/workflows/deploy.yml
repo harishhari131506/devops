@@ -3,7 +3,7 @@ name: Build and Deploy Docker App to EC2
 on:
   push:
     branches:
-      - main  # Trigger on push to main branch
+      - main  # Trigger on push to the main branch
 
 jobs:
   build-and-deploy:
@@ -11,6 +11,9 @@ jobs:
     steps:
     - name: Checkout the repository
       uses: actions/checkout@v2
+
+    - name: List files (for debugging)
+      run: ls -la
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -26,26 +29,26 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}  # Add this secret in GitHub Secrets
-        password: ${{ secrets.DOCKER_PASSWORD }}  # Add this secret in GitHub Secrets
+        username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
+        password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub password or access token
 
     - name: Build Docker image
       run: |
-        docker build -t myapp:${{ github.sha }} .
-      
+        docker build -t harish130615/sample:${{ github.sha }} .  # Replace with your Docker Hub username/repo name
+
     - name: Push Docker image to Docker Hub
       run: |
-        docker push myapp:${{ github.sha }}
+        docker push harish130615/sample:${{ github.sha }}  # Replace with your Docker Hub username/repo name
 
     - name: SSH to EC2 and deploy Docker container
       uses: appleboy/ssh-action@v0.1.0
       with:
         host: ${{ secrets.EC2_HOST }}  # EC2 public IP address
-        username: ubuntu  # Change based on your EC2 instance's user
-        key: ${{ secrets.EC2_SSH_KEY }}  # Your private SSH key secret
+        username: ubuntu  # EC2 user (typically 'ubuntu' for Ubuntu-based instances)
+        key: ${{ secrets.EC2_SSH_KEY }}  # SSH private key to access EC2
         port: 22
         script: |
           cd /home/ubuntu/app-directory  # Adjust to your app directory on EC2
-          docker pull myapp:${{ github.sha }}
-          docker-compose down  # Optional, stop previous containers
-          docker-compose up -d  # Or simply run the docker run command to start the container
+          docker pull harish130615/sample:${{ github.sha }}  # Pull the image from Docker Hub
+          docker-compose down  # Stop any running containers (optional)
+          docker-compose up -d  # Recreate and start containers in detached mode
