@@ -40,12 +40,10 @@ jobs:
         # Use docker-compose to build the images
         docker-compose -f docker-compose.yml build
 
-   - name: Tag Docker images
+    - name: Tag Docker images
       run: |
         # Tag each service image based on the commit SHA
         docker-compose -f docker-compose.yml images | awk '{if (NR>1) print $1}' | xargs -I {} docker tag {}:latest harish130615/{}:${{ github.sha }}
-
-
     - name: Push Docker images to Docker Hub
       run: |
         # Push all images defined in your docker-compose.yml to Docker Hub
