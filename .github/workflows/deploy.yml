@@ -54,7 +54,7 @@ jobs:
       with:
         host: ${{ secrets.EC2_HOST }}  # EC2 public IP address
         username: ubuntu  # EC2 user (typically 'ubuntu' for Ubuntu-based instances)
-        key: ${{ secrets.EC2_SSH_KEY }}  # SSH private key to access EC2
+        key: ${{ secrets.EC2_SSH_KEY }} 
         port: 22
         script: |
           cd /home/ubuntu/app-directory  # Adjust to your app directory on EC2
