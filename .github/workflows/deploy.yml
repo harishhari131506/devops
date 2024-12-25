@@ -1,4 +1,4 @@
-name: Build and Deploy Docker App to EC2
+name: Build and Deploy App with Docker Compose
 
 on:
   push:
@@ -11,9 +11,6 @@ jobs:
     steps:
     - name: Checkout the repository
       uses: actions/checkout@v2
-
-    - name: List files (for debugging)
-      run: ls -la
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -29,16 +26,25 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub username
-        password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub password or access token
+        username: ${{ secrets.DOCKER_USERNAME }}  # Add this secret in GitHub Secrets
+        password: ${{ secrets.DOCKER_PASSWORD }}  # Add this secret in GitHub Secrets
 
-    - name: Build Docker image
+    - name: Build Docker images with Docker Compose
       run: |
-        docker build -t harish130615/sample:${{ github.sha }} .  # Replace with your Docker Hub username/repo name
+        # Use docker-compose to build the images
+        docker-compose -f docker-compose.yml build
 
-    - name: Push Docker image to Docker Hub
+    - name: Tag Docker images
       run: |
-        docker push harish130615/sample:${{ github.sha }}  # Replace with your Docker Hub username/repo name
+        # Tag the images based on the commit SHA for versioning
+        docker tag myapp:latest harish130615/sample:${{ github.sha }}  # Replace 'myapp' with your service name
+        # Alternatively, tag all images defined in your docker-compose.yml
+        docker-compose -f docker-compose.yml images | awk '{print $1}' | xargs -I {} docker tag {}:{} harish130615/sample:${{ github.sha }}
+
+    - name: Push Docker images to Docker Hub
+      run: |
+        # Push all images defined in your docker-compose.yml to Docker Hub
+        docker-compose -f docker-compose.yml push
 
     - name: SSH to EC2 and deploy Docker container
       uses: appleboy/ssh-action@v0.1.0
@@ -49,6 +55,5 @@ jobs:
         port: 22
         script: |
           cd /home/ubuntu/app-directory  # Adjust to your app directory on EC2
-          docker pull harish130615/sample:${{ github.sha }}  # Pull the image from Docker Hub
-          docker-compose down  # Stop any running containers (optional)
+          docker-compose pull  # Pull the latest images from Docker Hub
           docker-compose up -d  # Recreate and start containers in detached mode
