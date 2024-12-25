@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # Define the backend service (Node.js Express)
+  backend:
+    build: 
+      context: ./backend
+    ports:
+      - "3000:3000"  # Expose the port 3000 on the host and map it to the container
+    environment:
+      - NODE_ENV=development
+      - DB_USER=postgres
+      - DB_HOST=postgres
+      - DB_NAME=students
+      - DB_PASS=Harish@9360461148
+      - DB_PORT=5432
+    depends_on:
+      - postgres  # Ensure the backend service waits for the postgres service
+    networks:
+      - app-network  # Add the backend to a common network
+
+  # Define the PostgreSQL service
+  postgres:
+    image: postgres:13  # You can use any version of PostgreSQL
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Harish@9360461148
+      POSTGRES_DB: students
+    volumes:
+      - postgres_data:/var/lib/postgresql/data 
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d 
+    ports:
+      - "5432:5432"  # Expose the port 5432 on the host
+    networks:
+      - app-network  # Add the PostgreSQL service to the same network
+
+  # Define the frontend service (Angular + Nginx)
+  frontend:
+    build:
+      context: ./frontend  # Path to your frontend Dockerfile
+    ports:
+      - "80:80"  # Expose port 80 (Nginx serves the Angular app here)
+    depends_on:
+      - backend  # Ensure frontend waits for backend to start
+    networks:
+      - app-network  # Add frontend to the same network
+
+# Define volumes for persistent data storage
+volumes:
+  postgres_data:
+  
+
+# Define networks for communication between services
+networks:
+  app-network:
+    driver: bridge
+
+
+# version: '3.8'
+
+# services:
+#   # Define the backend service (Node.js Express)
+#   backend:
+#     build: 
+#       context: ./backend
+#     ports:
+#       - "3000:3000"  # Expose the port 3000 on the host and map it to the container
+#     environment:
+#       - NODE_ENV=development
+#       - DB_USER=postgres
+#       - DB_HOST=postgres
+#       - DB_NAME=students
+#       - DB_PASS=Harish@9360461148
+#       - DB_PORT=5432
+#     depends_on:
+#       - postgres  # Ensure the backend service waits for the postgres service
+
+#   # Define the PostgreSQL service
+#   postgres:
+#     image: postgres:13  # You can use any version of PostgreSQL
+#     environment:
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: Harish@9360461148
+#       POSTGRES_DB: students
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data  # Persist PostgreSQL data between restarts
+#     ports:
+#       - "5432:5432"  # Expose the port 5432 on the host
+
+# # Define volumes for persistent data storage
+# volumes:
+#   postgres_data:
