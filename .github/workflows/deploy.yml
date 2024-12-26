@@ -1,4 +1,4 @@
-name: Create Directory on Push
+name: Build Docker Image, Create Directory on Push
 
 on:
   push:
@@ -6,13 +6,32 @@ on:
       - main # or any branch you want to trigger on push
 
 jobs:
-  create-dir:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
+      # Step 1: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v2
-        
+
+      # Step 2: Set up Docker Buildx (for building Docker images)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Step 3: Log in to Docker Hub (or your Docker registry)
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Step 4: Build and push the Docker image
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/your-repo-name:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/your-repo-name:latest
+
+      # Step 5: SSH to EC2 instance and create directory
       - name: SSH to Ubuntu Instance and create directory
         uses: appleboy/ssh-action@v0.1.5
         with:
@@ -22,3 +41,28 @@ jobs:
           port: 22
           script: |
             mkdir -p ~/hello\ word
+
+# name: Create Directory on Push
+
+# on:
+#   push:
+#     branches:
+#       - main # or any branch you want to trigger on push
+
+# jobs:
+#   create-dir:
+#     runs-on: ubuntu-latest
+    
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v2
+        
+#       - name: SSH to Ubuntu Instance and create directory
+#         uses: appleboy/ssh-action@v0.1.5
+#         with:
+#           host: ${{ secrets.UBUNTU_HOST }}
+#           username: ${{ secrets.UBUNTU_USER }}
+#           key: ${{ secrets.UBUNTU_SSH_KEY }}
+#           port: 22
+#           script: |
+#             mkdir -p ~/hello\ word
