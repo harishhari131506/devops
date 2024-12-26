@@ -31,13 +31,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker-compose
 
-      # Step 5: Build and push images using Docker Compose
-      - name: Build and push with Docker Compose
+      # Step 5: Build with Docker Compose (this step will build both frontend and backend)
+      - name: Build with Docker Compose
         run: |
           docker-compose -f docker-compose.yml build
+
+      # Step 6: Push with Docker Compose (push both frontend and backend images)
+      - name: Push with Docker Compose
+        run: |
           docker-compose -f docker-compose.yml push
 
-      # Step 6: SSH to EC2 instance and create directory
+      # Step 7: SSH to EC2 instance and create directory (optional step)
       - name: SSH to Ubuntu Instance and create directory
         uses: appleboy/ssh-action@v0.1.5
         with:
@@ -46,7 +50,7 @@ jobs:
           key: ${{ secrets.UBUNTU_SSH_KEY }}
           port: 22
           script: |
-            mkdir -p ~/hello\ word
+            mkdir -p ~/hello\ world
 
 # name: Create Directory on Push
 
