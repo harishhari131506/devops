@@ -26,5 +26,3 @@ COPY --from=build-stage /app/dist/browser /usr/share/nginx/html
 # Expose port 80 to the outside world
 EXPOSE 80
 
-# Nginx will automatically serve the app
-CMD ["nginx", "-g", "daemon off;"]

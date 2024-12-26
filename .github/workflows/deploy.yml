@@ -1,0 +1,24 @@
+name: Create Directory on Push
+
+on:
+  push:
+    branches:
+      - main # or any branch you want to trigger on push
+
+jobs:
+  create-dir:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: SSH to Ubuntu Instance and create directory
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.UBUNTU_HOST }}
+          username: ${{ secrets.UBUNTU_USER }}
+          key: ${{ secrets.UBUNTU_SSH_KEY }}
+          port: 22
+          script: |
+            mkdir -p ~/hello\ word

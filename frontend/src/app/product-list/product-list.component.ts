@@ -11,6 +11,8 @@ export class ProductListComponent {
   students: any[] = [];
   products = [...products];
   showForm: boolean = false;
+  addurl:any;
+  fetchurl:any;
 
   // New variables to hold input field values
   newStudent = {
@@ -21,10 +23,16 @@ export class ProductListComponent {
   };
   ngOnInit(): void {
     this.fetchStudents();
+console.log(window.location.origin)
+console.log(window.location.origin.includes('localhost'))
+this.addurl = window.location.origin.includes('localhost') ? 'http://localhost:3000/api/students/add' : 'http://54.167.60.106/api/students/add';
+this.fetchurl = window.location.origin.includes('localhost') ? 'http://localhost:3000/api/students' : 'http://54.167.60.106/api/students';
+console.log(this.fetchurl,"--------------")
   }
 
   addStudent(): void {
-    axios.post('http://localhost:3000/api/students/add', this.newStudent)
+
+    axios.post(this.addurl, this.newStudent)
       .then(response => {
         console.log('Student added:', response.data);
         this.students.push(response.data); // Add the new student to the list
@@ -40,7 +48,7 @@ export class ProductListComponent {
   }
 
   fetchStudents(): void {
-    axios.get('http://localhost:3000/api/students')
+    axios.get(window.location.origin.includes('localhost') ? 'http://localhost:3000/api/students' : 'http://54.167.60.106/api/students')
       .then(response => {
         console.log('API Response:', response.data);
         this.students = response.data;
