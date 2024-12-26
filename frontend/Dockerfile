@@ -1,5 +1,6 @@
+
 # Step 1: Build the Angular app
-FROM node:18 AS build-stage
+FROM node:18-alpine AS build-stage
 
 # Set the working directory
 WORKDIR /app
@@ -8,13 +9,13 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci --no-cache
 
 # Copy the rest of the application files
 COPY . .
 
 # Build the Angular app
-RUN npm run build --prod
+RUN npm run build --prod --verbose
 
 # Step 2: Serve the Angular app using Nginx
 FROM nginx:alpine AS production-stage
