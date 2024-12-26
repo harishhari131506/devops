@@ -1,9 +1,9 @@
-name: Build Docker Image, Create Directory on Push
+name: Build and Deploy with Docker Compose on Push
 
 on:
   push:
     branches:
-      - main # or any branch you want to trigger on push
+      - main  # Trigger on push to the 'main' branch (or any branch you prefer)
 
 jobs:
   build-and-deploy:
@@ -14,24 +14,30 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Step 2: Set up Docker Buildx (for building Docker images)
+      # Step 2: Set up Docker Buildx (required for Docker Compose)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      # Step 3: Log in to Docker Hub (or your Docker registry)
+      # Step 3: Log in to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Step 4: Build and push the Docker image
-      - name: Build and push Docker image
+      # Step 4: Set up Docker Compose
+      - name: Set up Docker Compose
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/your-repo-name:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/your-repo-name:latest
+          sudo apt-get update
+          sudo apt-get install -y docker-compose
 
-      # Step 5: SSH to EC2 instance and create directory
+      # Step 5: Build and push images using Docker Compose
+      - name: Build and push with Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml build
+          docker-compose -f docker-compose.yml push
+
+      # Step 6: SSH to EC2 instance and create directory
       - name: SSH to Ubuntu Instance and create directory
         uses: appleboy/ssh-action@v0.1.5
         with:
